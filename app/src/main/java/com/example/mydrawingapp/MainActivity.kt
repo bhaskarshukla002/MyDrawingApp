@@ -39,7 +39,6 @@ class MainActivity : AppCompatActivity() {
             showBrushSizeChooserDialog()
         }
 
-
     }
 
     private fun showBrushSizeChooserDialog(){
@@ -80,7 +79,6 @@ class MainActivity : AppCompatActivity() {
             mImageButtonCurrentPaint=view
 
         }
-
 
     }
 }
