@@ -4,19 +4,48 @@ import android.app.Dialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import com.example.mydrawingapp.databinding.ActivityMainBinding
+import android.Manifest
+import androidx.core.app.ActivityCompat
+
 
 class MainActivity : AppCompatActivity() {
 
     private var drawingView: DrawingView?=null
     private lateinit var binding: ActivityMainBinding
     private var mImageButtonCurrentPaint: ImageButton? = null
+
+
+
+
+    val requestPermission: ActivityResultLauncher<Array<String>> =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){
+                permission->
+                permission.entries.forEach{
+                    val permissionName = it.key
+                    val isGranted=it.value
+
+                    if(isGranted){
+                        Toast.makeText(this,
+                            "permission granted now you can read the storage files",
+                        Toast.LENGTH_SHORT).show()
+
+                    }else{
+                        if(permissionName == Manifest.permission.READ_EXTERNAL_STORAGE){
+                            Toast.makeText(this@MainActivity,"Oops you just Denied the permission",
+                                Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
 
 
 
@@ -39,6 +68,11 @@ class MainActivity : AppCompatActivity() {
             showBrushSizeChooserDialog()
         }
 
+        val ibGallery=findViewById<ImageButton>(R.id.ib_gallery)
+        ibGallery.setOnClickListener{
+            requestStoragePermission()
+
+        }
     }
 
     private fun showBrushSizeChooserDialog(){
@@ -80,6 +114,30 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    private fun requestStoragePermission(){
+        if(ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+        ){
+            showRationaleDialog("Kids Drawing App","kids Drawing App"+
+            "needs to access your External storage")
+        }else{
+            requestPermission.launch(arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            // TODO - ADD writing external storage permission
+            ))
+        }
+    }
+
+    private fun showRationaleDialog(title: String,message: String){
+        val builder: AlertDialog.Builder=AlertDialog.Builder(this)
+
+        builder.setTitle(title).setMessage(message)
+            .setPositiveButton("Cancel"){dialog,_->
+                dialog.dismiss()
+            }.create().show()
     }
 }
 
